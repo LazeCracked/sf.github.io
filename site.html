@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Border and Animated Heart</title>
+    <style>
+        /* Genel stil ayarları */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #0a0a0a;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Neon kenar efekti */
+        .neon-border {
+            width: 150px;
+            height: 300px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 1), 0 0 60px rgba(255, 0, 255, 1);
+            margin: 0 40px;
+            overflow: hidden; /* Taşmayı engeller */
+            opacity: 0; /* Başlangıçta görünmez */
+            transition: all 1s ease; /* Geçiş animasyonu */
+        }
+
+        /* Görseller */
+        .side-image {
+            width: 100%; /* Tam genişlik */
+            height: 100%; /* Tam yükseklik */
+            object-fit: cover; /* Resmin kutuya tam oturmasını sağlar */
+        }
+
+        /* S-F Yazısı */
+        .sf-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 3rem;
+            color: #ff4d4d;
+            font-weight: bold;
+            text-transform: uppercase;
+            transform: translate(-50%, -50%);
+            animation: heartbeat-text 1s infinite;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px rgba(255, 77, 77, 0.7);
+            cursor: pointer; /* Tıklanabilir hale getirme */
+        }
+
+        /* Yazının animasyonu */
+        @keyframes heartbeat-text {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+
+        /* Arka planda çalan müzik */
+        audio {
+            display: none;
+        }
+
+        /* Konfeti efekti */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* Konfeti tıklanabilir değil */
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Neon kenarlı sol görsel -->
+    <div class="neon-border" id="left-image">
+        <img class="side-image" src="s.jpg" alt="Left Image">
+    </div>
+    
+    <!-- Ortada atan S-F yazısı -->
+    <div class="sf-text" id="heart-text">❤</div>
+
+    <!-- Neon kenarlı sağ görsel -->
+    <div class="neon-border" id="right-image">
+        <img class="side-image" src="f.jpg" alt="Right Image">
+    </div>
+
+    <!-- Konfeti canvas -->
+    <canvas id="confetti"></canvas>
+
+    <!-- Arka plan müziği -->
+    <audio id="background-music">
+        <source src="şarkı.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Konfeti patlatma işlevi
+        function startConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            let particles = [];
+            const colors = ['#ff4d4d', '#4dff4d', '#4d4dff'];
+
+            // Konfeti partiküllerini oluşturma
+            function createParticle(x, y) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    radius: Math.random() * 5 + 2,
+                    speedX: Math.random() * 6 - 3,
+                    speedY: Math.random() * -6 - 1,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+
+            // Konfeti animasyonu
+            function animateConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    p.speedY += 0.05; // Yerçekimi etkisi
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                    if (p.y > canvas.height) {
+                        particles.splice(i, 1);
+                        i--;
+                    }
+                }
+                requestAnimationFrame(animateConfetti);
+            }
+
+            // Başlat
+            animateConfetti();
+
+            // Konfeti patlatma fonksiyonu
+            document.getElementById('heart-text').addEventListener('click', (e) => {
+                for (let i = 0; i < 100; i++) {
+                    createParticle(e.clientX, e.clientY);
+                }
+
+                // Şarkıyı başlat
+                const audio = document.getElementById('background-music');
+                audio.play();
+
+                // Görsel bölümleri görünür yapma
+                document.getElementById('left-image').style.opacity = 1;
+                document.getElementById('right-image').style.opacity = 1;
+
+                // Görselleri büyütme
+                document.getElementById('left-image').style.transform = 'scale(1.2)';
+                document.getElementById('right-image').style.transform = 'scale(1.2)';
+            });
+        }
+
+        // Sayfa açıldığında konfeti başlat
+        window.onload = startConfetti;
+    </script>
+</body>
+</html>
